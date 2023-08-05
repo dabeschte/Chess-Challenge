@@ -90,7 +90,6 @@ public class MyBot : IChessBot
     int getBoardScoreRecursive(Board board, Timer timer, int recursionCounter, bool isMyRound)
     {
         Move[] moves = board.GetLegalMoves();
-        var boardsAfterMove = new List<Board>(moves.Length);
         int scoreSign = isMyRound ? 1 : -1;
 
         var scores = new List<int>();
@@ -104,27 +103,31 @@ public class MyBot : IChessBot
         {
             scores.Add(0);
             Move move = moves[i];
+            board.MakeMove(move);
 
-            // is there a faster way to clone a board?
-            Board boardAfterMove = Board.CreateBoardFromFEN(board.GetFenString());
-            boardAfterMove.MakeMove(move);
-            boardsAfterMove.Add(boardAfterMove);
-
-            if (boardAfterMove.IsInCheckmate())
+            if (board.IsInCheckmate())
             {
-                return 100000000 * scoreSign;
+                board.UndoMove(move);
+                return 50 * scoreSign;
             }
             if (move.IsCapture)
             {
-                scores[i] += captureScores[move.CapturePieceType] * scoreSign;
+                scores[i] += captureScores[move.CapturePieceType];
             }
+            board.UndoMove(move);
         }
 
         var scoresCopy = new List<int>(scores);
         scores.Sort();
 
         if (recursionCounter == 0) {
-            return scoreSign * scores.Last();
+            if (isMyRound)
+            {
+                return scores.Last();
+            } else
+            {
+                return scores.First();
+            }
         }
 
 
@@ -135,22 +138,24 @@ public class MyBot : IChessBot
             int scoreIdx = scores.Count - 1 - i;
             int moveIdx = scoresCopy.IndexOf(scores[scoreIdx]);
 
-            Board boardAfterMove = boardsAfterMove[moveIdx];
-            scores[scoreIdx] += getBoardScoreRecursive(boardAfterMove, timer, recursionCounter - 1, !isMyRound);
+            board.MakeMove(moves[moveIdx]);
+            scores[scoreIdx] += getBoardScoreRecursive(board, timer, recursionCounter - 1, !isMyRound);
+            board.UndoMove(moves[moveIdx]);
 
             if (scores[scoreIdx] > maxScore)
             {
-                scores[scoreIdx] = maxScore;
+                maxScore = scores[scoreIdx];
                 maxScoreIdx = scoreIdx; // #DEBUG
             }
         }
 
-        return maxScore;
+        return maxScore * scoreSign;
     }
 
 
     public Move Think(Board board, Timer timer)
     {
+        Console.WriteLine("\n\n\n"); // #DEBUG
         Move[] moves = board.GetLegalMoves();
         int[] scores = new int[moves.Length];
 
@@ -265,14 +270,13 @@ public class MyBot : IChessBot
             scores[i] -= (tmpOtherAttackScore_after - otherAttackScore_before) * 3;
 
 
+            scores[i] += getBoardScoreRecursive(board_after, timer, 1, false) * 4;
+
+
             Console.WriteLine(move + " (" + i + ") has a score of " + scores[i]); // #DEBUG
 
 
-            //scores[i] += getBoardScoreRecursive(boardAfterMove, timer, 4, false) * 2;
-            scores[i] += getBoardScoreRecursive(board_after, timer, 2, false) * 2;
-
-
-            if (scores[i] >= maxScore)
+            if (scores[i] > maxScore || board_after.IsInCheckmate())
             {
                 maxScore = scores[i];
                 maxScoreIndex = i;
@@ -282,7 +286,7 @@ public class MyBot : IChessBot
                 otherSafetyText_after = tmpOtherSafetyText_after; // #DEBUG
                 moveReason = currentMoveReason; // #DEBUG
 
-                if (board.IsInCheckmate())
+                if (board_after.IsInCheckmate())
                 {
                     break;
                 }
@@ -300,8 +304,6 @@ public class MyBot : IChessBot
         Console.WriteLine("other safety after detailed: " + otherSafetyText_after); // #DEBUG
 
         Console.WriteLine("\n " + moveReason); // #DEBUG
-
-        Console.WriteLine("\n\n\n"); // #DEBUG
         return moves[maxScoreIndex];
     }
 }
