@@ -194,28 +194,31 @@ public class MyBot : IChessBot
 
             string currentMoveReason = ""; // #DEBUG
 
-            bool underAttack_after = false;
-            if (board.SquareIsAttackedByOpponent(move.StartSquare))
-            {
-                underAttack_after = true;
-                currentMoveReason += piece_before.PieceType + " is under attack"; // #DEBUG
-                if (!board_after_skipped.SquareIsAttackedByOpponent(move.TargetSquare))
-                {
-                    underAttack_after = false;
-                    scores[i] += captureScores[move.MovePieceType] * 100;
-                    currentMoveReason += " but we move it away"; // #DEBUG
-                }
-            }
-            else
-            {
-                currentMoveReason += piece_before.PieceType + " was safe"; // #DEBUG
-                if (board.SquareIsAttackedByOpponent(move.TargetSquare))
-                {
-                    underAttack_after = true;
-                    scores[i] -= captureScores[move.MovePieceType] * 100;
-                    currentMoveReason += " but we risk moving it to unsafe zone"; // #DEBUG
-                }
-            }
+
+            // looks like the following 40 lines actually don't have a big impact on the outcome anymore
+            // overall safety and attack scores seem to cover that well enough
+            //bool underAttack_after = false;
+            //if (board.SquareIsAttackedByOpponent(move.StartSquare))
+            //{
+            //    underAttack_after = true;
+            //    currentMoveReason += piece_before.PieceType + " is under attack"; // #DEBUG
+            //    if (!board_after_skipped.SquareIsAttackedByOpponent(move.TargetSquare))
+            //    {
+            //        underAttack_after = false;
+            //        scores[i] += captureScores[move.MovePieceType] * 100;
+            //        currentMoveReason += " but we move it away"; // #DEBUG
+            //    }
+            //}
+            //else
+            //{
+            //    currentMoveReason += piece_before.PieceType + " was safe"; // #DEBUG
+            //    if (board.SquareIsAttackedByOpponent(move.TargetSquare))
+            //    {
+            //        underAttack_after = true;
+            //        scores[i] -= captureScores[move.MovePieceType] * 100;
+            //        currentMoveReason += " but we risk moving it to unsafe zone"; // #DEBUG
+            //    }
+            //}
 
             if (isProtected(piece_before, board))
             {
@@ -223,7 +226,7 @@ public class MyBot : IChessBot
                 if (!isProtected(piece_after, board_after))
                 {
                     currentMoveReason += " but not anymore at target place"; // #DEBUG
-                    scores[i] -= captureScores[move.MovePieceType] * (underAttack_after ? 100 : 10);
+                    //scores[i] -= captureScores[move.MovePieceType] * (underAttack_after ? 100 : 10);
                 }
             } else
             {
@@ -231,8 +234,7 @@ public class MyBot : IChessBot
                 if (isProtected(piece_after, board_after))
                 {
                     currentMoveReason += " but will be at target place"; // #DEBUG
-                    scores[i] += captureScores[move.MovePieceType] * 40;
-                    isProtected(piece_after, board);
+                    //scores[i] += captureScores[move.MovePieceType] * 40;
                 }
             }
 
