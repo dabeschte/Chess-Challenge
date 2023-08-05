@@ -139,7 +139,7 @@ public class MyBot : IChessBot
             int moveIdx = scoresCopy.IndexOf(scores[scoreIdx]);
 
             board.MakeMove(moves[moveIdx]);
-            scores[scoreIdx] += getBoardScoreRecursive(board, timer, recursionCounter - 1, !isMyRound);
+            scores[scoreIdx] = scores[scoreIdx] * recursionCounter + getBoardScoreRecursive(board, timer, recursionCounter - 1, !isMyRound);
             board.UndoMove(moves[moveIdx]);
 
             if (scores[scoreIdx] > maxScore)
@@ -270,7 +270,7 @@ public class MyBot : IChessBot
             scores[i] -= (tmpOtherAttackScore_after - otherAttackScore_before) * 3;
 
 
-            scores[i] += getBoardScoreRecursive(board_after, timer, 1, false) * 4;
+            scores[i] += getBoardScoreRecursive(board_after, timer, 3, false) * 1;
 
 
             Console.WriteLine(move + " (" + i + ") has a score of " + scores[i]); // #DEBUG
