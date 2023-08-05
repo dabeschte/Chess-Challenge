@@ -51,7 +51,7 @@ public class MyBot : IChessBot
 
     int getSafetyScore(Board board, ref string output)
     {
-        output = "checking board safety for " + (board.IsWhiteToMove ? "white" : "black");
+        output = "checking board safety for " + (board.IsWhiteToMove ? "white" : "black"); // #DEBUG
         int score = 0;
         var pieces = board.GetAllPieceLists().Where(x => x.IsWhitePieceList == board.IsWhiteToMove);
         foreach(var piecelist in pieces)
@@ -60,11 +60,11 @@ public class MyBot : IChessBot
             {
                 if (board.SquareIsAttackedByOpponent(piece.Square))
                 {
-                    output += "\n" + piece.ToString() + " on " + piece.Square + " is under attack by " + (board.IsWhiteToMove ? "black" : "white");
-                    if (isProtected(piece, board))
-                    {
-                        output += ", but is protected";
-                    }
+                    output += "\n" + piece.ToString() + " on " + piece.Square + " is under attack by " + (board.IsWhiteToMove ? "black" : "white"); // #DEBUG
+                    if (isProtected(piece, board)) // #DEBUG
+                    { // #DEBUG
+                        output += ", but is protected"; // #DEBUG
+                    } // #DEBUG
                     score -= captureScores[piece.PieceType] * (isProtected(piece, board) ? 1 : 3);
                 }
             }
@@ -129,7 +129,7 @@ public class MyBot : IChessBot
 
 
         int maxScore = -1000000;
-        int maxScoreIdx = -1;
+        int maxScoreIdx = -1; // #DEBUG
         for (int i = 0; i < Math.Min(recursionCounter, scores.Count); i++)
         {
             int scoreIdx = scores.Count - 1 - i;
@@ -141,7 +141,7 @@ public class MyBot : IChessBot
             if (scores[scoreIdx] > maxScore)
             {
                 scores[scoreIdx] = maxScore;
-                maxScoreIdx = scoreIdx;
+                maxScoreIdx = scoreIdx; // #DEBUG
             }
         }
 
@@ -172,9 +172,9 @@ public class MyBot : IChessBot
         int otherSafetyScore_after = otherSafetyScore_before;
 
 
-        string moveReason = "";
+        string moveReason = ""; // #DEBUG
 
-        for(int i = 0; i < moves.Length; i++)
+        for (int i = 0; i < moves.Length; i++)
         {
             scores[i] = 0;
             Move move = moves[i];
@@ -187,45 +187,45 @@ public class MyBot : IChessBot
             var piece_before = new Piece(move.MovePieceType, board.IsWhiteToMove, move.StartSquare);
             var piece_after = new Piece(move.MovePieceType, board.IsWhiteToMove, move.TargetSquare);
 
-            string currentMoveReason = "";
+            string currentMoveReason = ""; // #DEBUG
 
             bool underAttack_after = false;
             if (board.SquareIsAttackedByOpponent(move.StartSquare))
             {
                 underAttack_after = true;
-                currentMoveReason += piece_before.PieceType + " is under attack";
+                currentMoveReason += piece_before.PieceType + " is under attack"; // #DEBUG
                 if (!board_after_skipped.SquareIsAttackedByOpponent(move.TargetSquare))
                 {
                     underAttack_after = false;
                     scores[i] += captureScores[move.MovePieceType] * 100;
-                    currentMoveReason += " but we move it away";
+                    currentMoveReason += " but we move it away"; // #DEBUG
                 }
             }
             else
             {
-                currentMoveReason += piece_before.PieceType + " was safe";
+                currentMoveReason += piece_before.PieceType + " was safe"; // #DEBUG
                 if (board.SquareIsAttackedByOpponent(move.TargetSquare))
                 {
                     underAttack_after = true;
                     scores[i] -= captureScores[move.MovePieceType] * 100;
-                    currentMoveReason += " but we risk moving it to unsafe zone";
+                    currentMoveReason += " but we risk moving it to unsafe zone"; // #DEBUG
                 }
             }
 
             if (isProtected(piece_before, board))
             {
-                currentMoveReason += ". was protected";
-                if(!isProtected(piece_after, board_after))
+                currentMoveReason += ". was protected"; // #DEBUG
+                if (!isProtected(piece_after, board_after))
                 {
-                    currentMoveReason += " but not anymore at target place";
+                    currentMoveReason += " but not anymore at target place"; // #DEBUG
                     scores[i] -= captureScores[move.MovePieceType] * (underAttack_after ? 100 : 10);
                 }
             } else
             {
-                currentMoveReason += ". was unprotected";
+                currentMoveReason += ". was unprotected"; // #DEBUG
                 if (isProtected(piece_after, board_after))
                 {
-                    currentMoveReason += " but will be at target place";
+                    currentMoveReason += " but will be at target place"; // #DEBUG
                     scores[i] += captureScores[move.MovePieceType] * 40;
                     isProtected(piece_after, board);
                 }
@@ -234,7 +234,7 @@ public class MyBot : IChessBot
             if (move.IsCapture)
             {
                 int multiplier = 50;
-                currentMoveReason += ". Captures figure " + move.CapturePieceType;
+                currentMoveReason += ". Captures figure " + move.CapturePieceType; // #DEBUG
                 if (isProtected(piece_before, board))
                 {
                     multiplier *= 2;
@@ -252,7 +252,7 @@ public class MyBot : IChessBot
                 scores[i] -= 5000;
             }
 
-            string tmpMySafetyText_after = "", tmpOtherSafetyText_after = "";
+            string tmpMySafetyText_after = "", tmpOtherSafetyText_after = ""; // #DEBUG
             int tmpMyAttackScore_after = getBoardAttackCoverage(board_after);
             int tmpMySafetyScore_after = getSafetyScore(board_after_skipped, ref tmpMySafetyText_after);
             int tmpOtherAttackScore_after = getBoardAttackCoverage(board_after_skipped);
@@ -265,7 +265,7 @@ public class MyBot : IChessBot
             scores[i] -= (tmpOtherAttackScore_after - otherAttackScore_before) * 3;
 
 
-            Console.WriteLine(move + " (" + i + ") has a score of " + scores[i]);
+            Console.WriteLine(move + " (" + i + ") has a score of " + scores[i]); // #DEBUG
 
 
             //scores[i] += getBoardScoreRecursive(boardAfterMove, timer, 4, false) * 2;
@@ -276,11 +276,11 @@ public class MyBot : IChessBot
             {
                 maxScore = scores[i];
                 maxScoreIndex = i;
-                mySafetyScore_after = tmpMySafetyScore_after;
-                otherSafetyScore_after = tmpOtherSafetyScore_after;
-                mySafetyText_after = tmpMySafetyText_after;
-                otherSafetyText_after = tmpOtherSafetyText_after;
-                moveReason = currentMoveReason;
+                mySafetyScore_after = tmpMySafetyScore_after; // #DEBUG
+                otherSafetyScore_after = tmpOtherSafetyScore_after; // #DEBUG
+                mySafetyText_after = tmpMySafetyText_after; // #DEBUG
+                otherSafetyText_after = tmpOtherSafetyText_after; // #DEBUG
+                moveReason = currentMoveReason; // #DEBUG
 
                 if (board.IsInCheckmate())
                 {
@@ -289,19 +289,19 @@ public class MyBot : IChessBot
             }
         }
 
-        Console.WriteLine("using move " + maxScoreIndex + " " + moves[maxScoreIndex] + " with score of " + maxScore);
-        Console.WriteLine("my safety before " + mySafetyScore_before + " after " +  mySafetyScore_after);
-        Console.WriteLine("other safety before " +  otherSafetyScore_before + " after " + otherSafetyScore_after);
+        Console.WriteLine("using move " + maxScoreIndex + " " + moves[maxScoreIndex] + " with score of " + maxScore); // #DEBUG
+        Console.WriteLine("my safety before " + mySafetyScore_before + " after " +  mySafetyScore_after); // #DEBUG
+        Console.WriteLine("other safety before " +  otherSafetyScore_before + " after " + otherSafetyScore_after); // #DEBUG
+         // #DEBUG
+        Console.WriteLine("my safety before detailed: " + mySafetyText_before); // #DEBUG
+        Console.WriteLine("my safety after detailed: " + mySafetyText_after); // #DEBUG
 
-        Console.WriteLine("my safety before detailed: " + mySafetyText_before);
-        Console.WriteLine("my safety after detailed: " + mySafetyText_after);
+        Console.WriteLine("other safety before detailed: " + otherSafetyText_before); // #DEBUG
+        Console.WriteLine("other safety after detailed: " + otherSafetyText_after); // #DEBUG
 
-        Console.WriteLine("other safety before detailed: " + otherSafetyText_before);
-        Console.WriteLine("other safety after detailed: " + otherSafetyText_after);
+        Console.WriteLine("\n " + moveReason); // #DEBUG
 
-        Console.WriteLine("\n " + moveReason);
-
-        Console.WriteLine("\n\n\n");
+        Console.WriteLine("\n\n\n"); // #DEBUG
         return moves[maxScoreIndex];
     }
 }
